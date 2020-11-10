@@ -3,8 +3,8 @@ import ctypes
 
 TIME_OUT = 60
 DIR = os.path.dirname(__file__)
-LIB_PATH = os.path.join(DIR, 'FPModule_SDK.dll')
-FP_LIB = ctypesp.CDLL(LIB_PATH)
+LIB_PATH = os.path.join(DIR, 'lib/FPModule_SDK.dll')
+FP_LIB = ctypes.CDLL(LIB_PATH)
 
 def start_detection_flow():
     if not open_device():
