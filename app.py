@@ -9,35 +9,39 @@ def capture_fp_hex():
     try:
         _fp = __scan_image_hash()
         if _fp["error"]:
-            return __response({"error": _fp["error"]}, _fp["code"])
-        return __response({ "fp_hash": str(_fp["hash"]) }, 200)
+            return { "error": _fp["error"] } , _fp["code"]
+        return { "fp_hash": str(_fp["hash"]) }, 200
     except Exception as error:
-        return __response({ "error" : error }), 500
+        return { "error" : error }, 500
 
 @app.route('/match', methods=['POST'])
 def match_fp_to_hex_template():
     import imagehash
     threshold = 10
-    try:
-        is_match = False
-        _fp = __scan_image_hash()
 
-        if _fp["error"]:
-            return __response({"error": _fp["error"]}, _fp["code"])
+    _fp = __scan_image_hash()
 
-        data = json.loads(request.data)
-        template_hash = imagehash.hex_to_hash(data["fp_hash"])
-        diff = template_hash - _fp["hash"]
-        if diff <= threshold:
-            is_match = True
-        return __response({ "is_match": is_match }, 200)
-    except Exception as error:
-        return __response({ "error" : error }, 500)
+    if _fp["error"]:
+        return { "error": _fp["error"] }, _fp["code"]
+    
+    collected_hash = _fp["hash"]
+    samples = json.loads(request.data)["fp_samples"]
+    
+    for sample in samples:
+        try:
+            sample_hash = imagehash.hex_to_hash(sample)
+            diff = sample_hash - collected_hash 
+            if diff <= threshold:
+                return { "is_match" : True }, 200
+        except Exception as error:
+            print(error)
+
+    return { "is_match": False }, 404
 
 def __scan_image_hash():
     response = {"error": False}
     _fp = fp.start_detection_flow()
-    
+
     if _fp["error"]:
         return _fp
 
