@@ -14,11 +14,14 @@ FP_LIB = ctypes.CDLL(LIB_PATH)
 
 def start_detection_flow():
     if not open_device():
-        raise Exception('Unable to access fingerprint device')
+        return { "error" : "Unable to initialise the fingerprint scanner", "code": 500 }
 
     if not is_finger_detected():
-        raise Exception('Finger is not inserted in device')
-    return capture_image()
+        return { "error": "Finger not inserted on scanner", "code": 404 }
+
+    response = capture_image()
+    response["error"] = None 
+    return response
 
 def open_device():
     return FP_LIB.FPModule_OpenDevice() == 0
@@ -31,7 +34,7 @@ def capture_image():
     pdwHeight = ctypes.pointer(ctypes.c_int())
     pbyImageData = (ctypes.c_char * (3024*3024))()
     FP_LIB.FPModule_CaptureImage(pbyImageData, pdwWidth, pdwHeight)
-    return { 
+    return {
         "raw" : bytes(pbyImageData), 
         "size": (pdwWidth.contents.value, pdwHeight.contents.value)
     } 

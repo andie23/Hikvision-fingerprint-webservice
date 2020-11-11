@@ -7,9 +7,12 @@ app = Flask(__name__)
 @app.route('/capture', methods=['GET'])
 def capture_fp_hex():
     try:
-        return str({"fp_hash": str(__scan_image_hash())})
+        _fp = __scan_image_hash()
+        if _fp["error"]:
+            return __response({"error": _fp["error"]}, _fp["code"])
+        return __response({ "fp_hash": str(_fp["hash"]) }, 200)
     except Exception as error:
-        return str({ "error" : error }), 500
+        return __response({ "error" : error }), 500
 
 @app.route('/match', methods=['POST'])
 def match_fp_to_hex_template():
@@ -17,22 +20,34 @@ def match_fp_to_hex_template():
     threshold = 10
     try:
         is_match = False
+        _fp = __scan_image_hash()
+
+        if _fp["error"]:
+            return __response({"error": _fp["error"]}, _fp["code"])
+
         data = json.loads(request.data)
-        scanned_hash = __scan_image_hash()
         template_hash = imagehash.hex_to_hash(data["fp_hash"])
-        diff = template_hash - scanned_hash
+        diff = template_hash - _fp["hash"]
         if diff <= threshold:
             is_match = True
-        return str({ "is_match": is_match })
+        return __response({ "is_match": is_match }, 200)
     except Exception as error:
-        return str({ "error" : error }), 500
+        return __response({ "error" : error }, 500)
 
 def __scan_image_hash():
+    response = {"error": False}
     _fp = fp.start_detection_flow()
+
+    if _fp["error"]:
+        return _fp
+
     fp.save_temp_image(_fp['raw'], _fp['size'])
     image_hash = fp.get_temp_image_hash()
     fp.close_device()
-    return image_hash
+    return { "error": None, "hash": image_hash }
+
+def __response(payload, code):
+    return json.dumps(payload), code
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
