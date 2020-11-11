@@ -58,7 +58,7 @@ def save_temp_image(byte_image, imgsize):
     return image
 
 def get_temp_image_hash():
-    return str(imagehash.phash(Image.open(TEMP_IMAGE)))
+    return imagehash.average_hash(Image.open(TEMP_IMAGE))
 
 if __name__ == '__main__':
     print(get_sdk_version())

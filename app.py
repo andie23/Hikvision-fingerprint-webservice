@@ -1,23 +1,27 @@
 from flask import Flask, request
 import fp_module as fp
+import json
 
 app = Flask(__name__)
 
 @app.route('/capture', methods=['GET'])
 def capture_fp_hex():
     try:
-        return str({"fp_hash": __scan_image_hash()})
+        return str({"fp_hash": str(__scan_image_hash())})
     except Exception as error:
         return str({ "error" : error }), 500
 
 @app.route('/match', methods=['POST'])
 def match_fp_to_hex_template():
+    import imagehash
     threshold = 10
     try:
         is_match = False
-        template_hash = imagehash.hex_to_hash(request.data.fp_hash)
+        data = json.loads(request.data)
         scanned_hash = __scan_image_hash()
-        if (template_hash - scanned_hash) <= threshold:
+        template_hash = imagehash.hex_to_hash(data["fp_hash"])
+        diff = template_hash - scanned_hash
+        if diff <= threshold:
             is_match = True
         return str({ "is_match": is_match })
     except Exception as error:
