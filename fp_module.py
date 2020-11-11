@@ -21,6 +21,8 @@ def start_detection_flow():
 
     response = capture_image()
     response["error"] = None 
+    
+    close_device()
     return response
 
 def open_device():

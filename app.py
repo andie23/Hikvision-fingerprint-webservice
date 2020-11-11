@@ -37,13 +37,12 @@ def match_fp_to_hex_template():
 def __scan_image_hash():
     response = {"error": False}
     _fp = fp.start_detection_flow()
-
+    
     if _fp["error"]:
         return _fp
 
     fp.save_temp_image(_fp['raw'], _fp['size'])
     image_hash = fp.get_temp_image_hash()
-    fp.close_device()
     return { "error": None, "hash": image_hash }
 
 def __response(payload, code):
