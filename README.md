@@ -12,9 +12,10 @@ You can integrate this service with your website inside the browser using the lo
   `/match` : service for matching two fingerprint tokens
   
 # Requirements
- * Windows 10
- * Hikvision fingerprint SDK files
- * 
+ * Windows 7 or later
+ * (Recommended) HikVision Fingerprint recorder Device model DS-k1f820-F
+ * Python 3.0
+ 
 # Installation
   * In application folder, create direction named lib
   * Copy Hikvision SDK files into lib directory 
